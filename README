@@ -1,0 +1,7 @@
+Jezzball
+
+Jezzball is a game that originally implemented in Java using the GridWorld package as my final project in high school.
+
+I planned to re-implement it in Python using the pygames package but never got around to finishing it.
+
+This will eventually be cleaned up and completed.
