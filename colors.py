@@ -1,8 +1,4 @@
-'''
-Created on Aug 14, 2011
-
-@author: Admin
-'''
+#!/bin/python
 
 RED = (255,0,0)
 GREEN = (0,255,0)
