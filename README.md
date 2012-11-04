@@ -7,3 +7,6 @@ I planned to re-implement it as an exercise to learn Python, but unfortunately n
 
 I am finally getting around to finishing it. Though I am rewriting the game as
 my Python style from 1+ year ago was not the greatest.
+
+jezzball.py -- Rewriting from scratch
+Everything else -- what I had before but am temporarily keeping for reference
