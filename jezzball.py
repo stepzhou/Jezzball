@@ -7,7 +7,9 @@ from pygame.locals import *
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
+# Screen size
 SCREENRECT = Rect(0, 0, 800, 500)
+
 
 def load_image(file):
     "loads an image, prepares it for play"
@@ -42,7 +44,7 @@ def load_sound(file):
 
 
 class Player(pygame.sprite.Sprite):
-    speed = 10
+    speed = 8
     images = []
 
     def __init__(self):
@@ -61,24 +63,32 @@ class Player(pygame.sprite.Sprite):
 
 
 class Atom(pygame.sprite.Sprite):
-    speed = 8
+    speed = 6
     images = []
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.containers)
-        self.move = (random.choice((-1, 1)), random.choice((-1, 1)))
+        self.x_dir = random.choice((-1, 1))
+        self.y_dir = random.choice((-1, 1))
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.__rand_pos()
 
     def __rand_pos(self):
-        x = random.randint(0, SCREENRECT.width - self.rect.width)
-        y = random.randint(0, SCREENRECT.width - self.rect.height)
+        x = random.randint(self.rect.width, SCREENRECT.width - self.rect.width)
+        y = random.randint(self.rect.height, SCREENRECT.width - self.rect.height)
         return (x, y)
 
-    def update(self):
-        move = [n * self.speed for n in self.move]
+    def move_h(self):
+        move = (self.x_dir * self.speed, 0)
         self.rect.move_ip(move)
+
+    def move_v(self):
+        move = (0, self.y_dir * self.speed)
+        self.rect.move_ip(move)
+
+    def update(self):
+        pass
 
 
 class SafeWall(pygame.sprite.Sprite):
@@ -129,10 +139,10 @@ def main():
     active = pygame.sprite.RenderUpdates()
 
     # Assign default groups to each Sprite class
-    Atom.containers = atoms, active
+    Player.containers = active
+    Atom.containers = atoms, inactive
     SafeWall.containers = safewalls, inactive
     UnsafeWall.containers = unsafewalls, inactive
-    Player.containers = active
 
     # Starting values
     clock = pygame.time.Clock()
@@ -160,7 +170,7 @@ def main():
         inactive.clear(screen, background)
         active.clear(screen, background)
 
-        # Update sprites
+        # Update active sprites
         active.update()
 
         # Handle user input
@@ -169,18 +179,31 @@ def main():
         if x_dir or y_dir:
             player.move = (x_dir, y_dir)
 
-        if not player.is_safe and player.rect.topleft != player.last_move:
+        if player.rect.topleft != player.last_move:
             UnsafeWall(player.last_move)
 
+        # Player not safe unless colliding with safe wall
+        player.is_safe = False
+
+        # Player collision with safe walls
         if pygame.sprite.spritecollideany(player, safewalls):
+            player.is_safe = True
             for wall in unsafewalls:
                 SafeWall(wall.rect.topleft)
                 wall.kill()
 
-        for atom in pygame.sprite.groupcollide(atoms, safewalls, 0, 0):
-            # TODO: Correct Atom bouncing
-            
-            atom.move = [-n for n in atom.move] 
+        # Atom boouncing
+        for atom in atoms:
+            atom.move_v()
+            collision = pygame.sprite.spritecollide(atom, safewalls, 0)
+            if collision:
+                atom.y_dir = -atom.y_dir
+                atom.move_v()
+            atom.move_h()
+            collision = pygame.sprite.spritecollide(atom, safewalls, 0)
+            if collision:
+                atom.x_dir = -atom.x_dir
+                atom.move_h() 
 
         # Draw scene
         dirty = inactive.draw(screen)
