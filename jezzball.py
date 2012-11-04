@@ -60,9 +60,17 @@ class Atom(pygame.sprite.Sprite):
     speed = 8
     images = []
 
-    def __init__(self, x, y):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.containers)
-        self.move = (random.choice(-1, 1), random.choice(-1, 1))
+        self.move = (random.choice((-1, 1)), random.choice((-1, 1)))
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = self.__rand_start()
+
+    def __rand_start(self):
+        x = random.randint(0, SCREENRECT.width - self.rect.width)
+        y = random.randint(0, SCREENRECT.width - self.rect.height)
+        return (x, y)
 
     def update(self):
         move = [n * self.speed for n in self.move]
@@ -105,13 +113,15 @@ def main():
 
     # Initialize starting Sprites
     player = Player()
+    Atom()
 
-    while 1:
-        # Input
+    while player.alive():
+        # User input -- quitting
         for event in pygame.event.get():
             if event.type == QUIT or \
                 (event.type == KEYDOWN and event.key == K_ESCAPE):
                     return
+        # Input
         keystate = pygame.key.get_pressed()
 
         # Clear last drawn sprites
@@ -120,7 +130,7 @@ def main():
         # Update sprites
         all.update()
 
-        # Handle player input
+        # Handle user input
         x_dir = keystate[K_RIGHT] - keystate[K_LEFT]
         y_dir = keystate[K_DOWN] - keystate[K_UP]
         if x_dir or y_dir:
