@@ -193,6 +193,8 @@ def main():
                 wall.kill()
 
         # Atom boouncing
+        # Can't use groupcollide because need to know whether atom will
+        # collide vertically or horizontally to adjust its movement
         for atom in atoms:
             atom.move_v()
             collision = pygame.sprite.spritecollide(atom, safewalls, 0)
